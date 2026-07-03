@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Product Store - Instant Delivery</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;padding:20px}
+h1{text-align:center;margin:20px 0;font-size:2em;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;max-width:1400px;margin:0 auto}
+.card{background:#1e293b;border-radius:12px;padding:24px;border:1px solid #334155;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:#6366f1}
+.cat{display:inline-block;background:#334155;color:#94a3b8;padding:2px 10px;border-radius:20px;font-size:12px;margin-bottom:10px}
+.card h3{color:#f1f5f9;margin-bottom:8px;font-size:18px}
+.card p{color:#94a3b8;font-size:14px;margin-bottom:15px;min-height:40px}
+.price{font-size:28px;font-weight:bold;color:#22c55e;margin-bottom:15px}
+.email-input{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;margin-bottom:10px;font-size:14px}
+.buy-btn{width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;font-size:16px;font-weight:bold;cursor:pointer}
+.buy-btn:hover{opacity:.9}
+.buy-btn:disabled{opacity:.5;cursor:wait}
+.footer{text-align:center;margin-top:40px;color:#64748b;font-size:13px}
+</style>
+</head>
+<body>
+<h1>Digital Product Store</h1>
+<p class="subtitle">Instant delivery after payment | Secure checkout via Stripe</p>
+<div class="grid" id="grid"></div>
+<div class="footer">
+<p>25 products | AI Writing | Resume | PPT Templates</p>
+<p>Powered by Stripe | Auto-delivery via Email</p>
+</div>
+<script>
+const PRODUCTS=[
+{id:"AI-WRITE-001",name:"AI Writing Template - Viral Copy",desc:"10 viral copywriting templates",price:1.99,cents:199,cat:"AI Writing"},
+{id:"AI-WRITE-002",name:"AI Writing Template - SEO Optimized",desc:"10 SEO article writing templates",price:1.99,cents:199,cat:"AI Writing"},
+{id:"AI-WRITE-003",name:"AI Writing Template - Social Media Hits",desc:"15 viral social media note templates",price:2.99,cents:299,cat:"AI Writing"},
+{id:"AI-WRITE-004",name:"AI Writing Template - Blog Pro",desc:"20 blog article templates",price:2.99,cents:299,cat:"AI Writing"},
+{id:"AI-WRITE-005",name:"AI Writing Template - Video Scripts",desc:"10 short video script templates",price:1.99,cents:199,cat:"AI Writing"},
+{id:"AI-WRITE-006",name:"AI Writing Template - E-commerce",desc:"20 e-commerce product description templates",price:2.99,cents:299,cat:"AI Writing"},
+{id:"AI-WRITE-007",name:"AI Writing Template - Email Marketing",desc:"10 EDM email marketing templates",price:1.99,cents:199,cat:"AI Writing"},
+{id:"AI-WRITE-008",name:"AI Writing Template - Social Media Pro",desc:"15 Twitter/LinkedIn/Facebook templates",price:1.99,cents:199,cat:"AI Writing"},
+{id:"AI-WRITE-009",name:"AI Writing Template - Blog SEO",desc:"20 blog SEO templates",price:2.99,cents:299,cat:"AI Writing"},
+{id:"AI-WRITE-010",name:"AI Writing Template - Ultimate Bundle",desc:"All 10 AI writing template packs",price:5.99,cents:599,cat:"AI Writing"},
+{id:"RESUME-001",name:"Resume Template - Tech Industry",desc:"20 tech company resume templates",price:3.99,cents:399,cat:"Resume"},
+{id:"RESUME-002",name:"Resume Template - Finance",desc:"15 finance industry resume templates",price:3.99,cents:399,cat:"Resume"},
+{id:"RESUME-003",name:"Resume Template - Government",desc:"10 government job resume templates",price:2.99,cents:299,cat:"Resume"},
+{id:"RESUME-004",name:"Resume Template - Fresh Graduate",desc:"15 fresh graduate resume templates",price:2.99,cents:299,cat:"Resume"},
+{id:"RESUME-005",name:"Resume Template - Designer",desc:"10 designer portfolio+resume templates",price:4.99,cents:499,cat:"Resume"},
+{id:"RESUME-006",name:"Resume Template - English/Foreign",desc:"10 English resume templates",price:3.99,cents:399,cat:"Resume"},
+{id:"RESUME-007",name:"Resume Template - Freelancer",desc:"10 freelancer resume templates",price:2.99,cents:299,cat:"Resume"},
+{id:"RESUME-008",name:"Resume Template - Career Change",desc:"10 career change resume templates",price:2.49,cents:249,cat:"Resume"},
+{id:"RESUME-009",name:"Resume Template - Management",desc:"10 management level resume templates",price:4.99,cents:499,cat:"Resume"},
+{id:"RESUME-010",name:"Resume Template - Ultimate Bundle",desc:"All 10 resume template packs",price:9.99,cents:999,cat:"Resume"},
+{id:"PPT-001",name:"PPT Template - Business",desc:"10 business presentation templates",price:5.99,cents:599,cat:"PPT"},
+{id:"PPT-002",name:"PPT Template - Defense",desc:"10 thesis defense PPT templates",price:3.99,cents:399,cat:"PPT"},
+{id:"PPT-003",name:"PPT Template - Year-end Report",desc:"10 year-end report PPT templates",price:4.99,cents:499,cat:"PPT"},
+{id:"PPT-004",name:"PPT Template - Pitch Deck",desc:"10 BP pitch deck templates",price:6.99,cents:699,cat:"PPT"},
+{id:"PPT-005",name:"PPT Template - Ultimate Bundle",desc:"All 5 PPT template packs",price:13.99,cents:1399,cat:"PPT"}
+];
+const STRIPE_KEY="pk_test_51Th5PBK71o0xpFrgjU6Z3D4Z3QqQ8Z3QqQ8Z3QqQ8Z3QqQ8Z3QqQ8Z3QqQ8Z3QqQ";
+const API_BASE="https://store-api.example.com";
+const grid=document.getElementById('grid');
+PRODUCTS.forEach(p=>{
+const c=document.createElement('div');c.className='card';
+c.innerHTML=`<div class="cat">${p.cat}</div><h3>${p.name}</h3><p>${p.desc}</p><div class="price">$${p.price.toFixed(2)}</div><input type="email" id="email_${p.id}" placeholder="your@email.com" class="email-input"><button onclick="buy('${p.id}',${p.cents},'${p.name}')" class="buy-btn">Buy Now</button>`;
+grid.appendChild(c);
+});
+async function buy(id,cents,name){
+const email=document.getElementById('email_'+id).value.trim();
+if(!email){alert('Please enter your email');return;}
+const btn=event.target;btn.disabled=true;btn.textContent='Processing...';
+try{
+const r=await fetch('https://api.stripe.com/v1/checkout/sessions',{
+method:'POST',
+headers:{'Authorization':'Bearer pk_test_51Th5PBK71o0xpFrgycR54aCUnng0c0N6Gcitjm1AzK3EMbWRlU5ZIsaUQedVmVlXeCvqPWh0QO3YkY90xzggfBrM00ai7VGVXB','Content-Type':'application/x-www-form-urlencoded'},
+body:new URLSearchParams({
+'mode':'payment',
+'line_items[0][price_data][currency]':'usd',
+'line_items[0][price_data][product_data][name]':name,
+'line_items[0][price_data][unit_amount]':cents,
+'line_items[0][quantity]':'1',
+'success_url':window.location.origin+'/?success=1',
+'cancel_url':window.location.origin+'/?cancel=1',
+'customer_email':email,
+'metadata[product_id]':id,
+'metadata[email]':email
+})
+});
+const data=await r.json();
+if(data.url){window.location.href=data.url;}
+else{alert('Error: '+(data.error?.message||'Unknown'));btn.disabled=false;btn.textContent='Buy Now';}
+}catch(e){alert('Error: '+e.message);btn.disabled=false;btn.textContent='Buy Now';}
+}
+</script>
+</body>
+</html>
